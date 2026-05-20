@@ -10,10 +10,6 @@ pipeline {
                     args '-v /var/jenkins_home:/var/jenkins_home -e GOPATH=/var/jenkins_home/go -e GOCACHE=/var/jenkins_home/.cache/go-build'
                 }
             }
-            environment {
-                HOME = '/tmp'
-                GOCACHE = '/tmp/go-cache'
-            }
             steps {
                 dir('bugtracker-backend') {
                     sh 'go test -v ./...'
