@@ -30,10 +30,10 @@ pipeline {
                     post {
                         always {
                             junit 'bugtracker-backend/test-results.xml'
-                            publishHTML target: [
-                                reportDir: 'bugtracker-backend/reports',
-                                reportFiles: 'coverage.html',
-                                reportName: 'Backend Coverage Report'
+                            publishHTML target [
+                                reportDir 'bugtracker-backend/reports',
+                                reportFiles 'coverage.html',
+                                reportName 'Backend Coverage Report'
                             ]    
                         }
                     }
@@ -59,14 +59,26 @@ pipeline {
                     post {
                         always {
                             junit 'bugtracker-frontend/test-results.xml'
-                            publishHTML target: [
-                                reportDir: 'bugtracker-frontend/reports/coverage',
-                                reportFiles: 'index.html',
-                                reportName: 'Frontend Coverage Report'
+                            publishHTML target [
+                                reportDir 'bugtracker-frontend/reports/coverage',
+                                reportFiles 'index.html',
+                                reportName 'Frontend Coverage Report'
                             ]
                         }
                     }
                 }
+            }
+        }
+        stage('Launch Application') {
+            agent {
+                docker {
+                    image 'docker:27.5.1'
+                    reuseNode true
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -u 0'
+                }
+            }
+            steps {
+                sh 'docker compose up -d'
             }
         }
     }
