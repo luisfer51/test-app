@@ -13,7 +13,7 @@ jobs:
   unit-tests-backend:
     runs-on: ubuntu-latest
     outputs:
-      coverage: ${{ steps.unit-tests-backend-id.outputs.coverage_report }}
+      coverage: ${{ steps.unit-tests-backend-id.outputs.report }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
           cat coverage.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-          echo "coverage_report<<EOF" >> $GITHUB_OUTPUT
+          echo "report<<EOF" >> $GITHUB_OUTPUT
           cat coverage.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
@@ -96,5 +96,5 @@ jobs:
           body: |
             ## Backend Test Coverage Report ##
             ```
-            ${{ needs.unit-tests-backend.outputs.coverage_report }}
+            ${{ needs.unit-tests-backend.outputs.coverage }}
             ```
