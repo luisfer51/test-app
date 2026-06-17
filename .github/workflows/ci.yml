@@ -28,9 +28,9 @@ jobs:
           cat output.txt | go-junit-report > test-results.xml
           go tool cover -func=coverage.out > coverage.txt
           echo "### Go Test Coverage Report ###" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           cat coverage.txt >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           
       - name: Publish Backend Test Results
         uses: dorny/test-reporter@v3
