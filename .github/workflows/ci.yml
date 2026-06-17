@@ -21,24 +21,29 @@ jobs:
       - name: Install go-junit-report
         run: go install github.com/jstemmer/go-junit-report/v2@latest
       
-      - name: Execute Backend Unit Tests
-        working-directory: ./bugtracker-backend
+      - name: Run Backend Unit Tests
+        working-directory: bugtracker-backend
         run: |
-          go test -v -coverprofile=coverage.out -covermode=atomic ./... 2>&1 | tee output.txt
-          cat output.txt | go-junit-report > test-results.xml
-          go tool cover -func=coverage.out > coverage.txt
-          echo "### Go Test Coverage Report ###" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat coverage.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          
+          go test -v ./... 2>&1 | go-junit-report > test-results.xml
+          go test -coverprofile=coverage.out -covermode=atomic ./...
+          go tool cover -html=coverage.out -o coverage.html
+          mkdir -p reports
+          mv coverage.html reports/
+
       - name: Publish Backend Test Results
         uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Backend Unit Tests Report
-          path: ./bugtracker-backend/test-results.xml
+          path: bugtracker-backend/test-results.xml
           reporter: java-junit
+
+      - name: Upload Backend Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage-report
+          path: bugtracker-backend/reports/coverage.html
 
   unit-tests-frontend:
     needs: unit-tests-backend
