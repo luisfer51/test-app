@@ -24,17 +24,17 @@ jobs:
       - name: Execute Backend Unit Tests
         working-directory: ./bugtracker-backend
         run: |
-          go test -coverprofile=coverage.out -covermode=atomic ./...  
+          go test -json -coverprofile=coverage.out -covermode=atomic ./...  
           go tool cover -func=coverage.out > coverage.txt
           echo "### Go Test Coverage Report ###" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
-          echo coverage.txt >> $GITHUB_STEP_SUMMARY
+          cat coverage.txt >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
   
           go test -v ./... 2>&1 | go-junit-report > test-results.xml
           
       - name: Publish Backend Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Backend Unit Tests Report
