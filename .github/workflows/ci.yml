@@ -39,7 +39,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
           echo "report<<EOF" >> $GITHUB_OUTPUT
-          cat coverage.txt >> $GITHUB_OUTPUT
+          cat coverage.txt | column -t > coverage-aligned.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Publish Backend Test Results
