@@ -12,8 +12,10 @@ on:
 jobs:
   unit-tests-backend:
     runs-on: ubuntu-latest
+
     outputs:
       coverage: ${{ steps.unit-tests-backend-id.outputs.report }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,14 +35,18 @@ jobs:
           go test -v -coverprofile=coverage.out -covermode=atomic ./... 2>&1 | tee output.txt
           cat output.txt | go-junit-report > test-results.xml
           go tool cover -func=coverage.out > coverage.txt
-          echo "### Backend Test Coverage Report ###" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat coverage.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### Backend Test Coverage Report ###"
+            echo '```'
+            cat coverage.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
 
-          echo "report<<EOF" >> $GITHUB_OUTPUT
-          cat coverage.txt | column -t > coverage-aligned.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "report<<EOF"
+            column -t coverage.txt
+            echo "EOF" 
+          } >> $GITHUB_OUTPUT
           
       - name: Publish Backend Test Results
         uses: dorny/test-reporter@v3
@@ -52,6 +58,9 @@ jobs:
 
   unit-tests-frontend:
     runs-on: ubuntu-latest
+
+    outputs:
+      coverage: ${{ steps.unit-tests-frontend-id.outputs.report }}
     
     steps:
       - uses: actions/checkout@v4
@@ -63,16 +72,25 @@ jobs:
           cache: "npm"
           cache-dependency-path: ./bugtracker-frontend/package-lock.json
 
-      - name: Execute Frontend Unit unit-tests
+      - name: Execute Frontend Unit Tests
+        id: unit-tests-frontend-id
         working-directory: ./bugtracker-frontend
         run: |
           npm ci
           npm test | tee full_output.txt
 
-          echo "### Frontend Test Coverage Report ###" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat full_output.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### Frontend Test Coverage Report ###"
+            echo '```'
+            cat full_output.txt
+            echo '```' 
+          } >> $GITHUB_STEP_SUMMARY
+
+          {
+            echo "report<<EOF"
+            cat full_output.txt
+            echo "EOF" 
+          } >> $GITHUB_OUTPUT
 
       - name: Publish Frontend Test Results
         uses: dorny/test-reporter@v1
@@ -82,9 +100,9 @@ jobs:
           path: ./bugtracker-frontend/test-results.xml
           reporter: java-junit
 
-  create-backend-coverage-comment:
+  create-coverage-comment:
     if: github.event_name == 'pull_request'
-    needs: unit-tests-backend
+    needs: [unit-tests-backend, unit-tests-frontend]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -97,4 +115,14 @@ jobs:
             ## Backend Test Coverage Report ##
             ```
             ${{ needs.unit-tests-backend.outputs.coverage }}
+            ```
+
+      - name: Create Frontend Coverage Comment
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## Frontend Test Coverage Report ##
+            ```
+            ${{ needs.unit-tests-frontend.outputs.coverage }}
             ```
