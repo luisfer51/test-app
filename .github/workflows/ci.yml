@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   unit-tests-backend:
     runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.unit-tests-backend-id.outputs.report }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +27,7 @@ jobs:
         run: go install github.com/jstemmer/go-junit-report/v2@latest
       
       - name: Execute Backend Unit Tests
+        id: unit-tests-backend-id
         working-directory: ./bugtracker-backend
         run: |
           go test -v -coverprofile=coverage.out -covermode=atomic ./... 2>&1 | tee output.txt
@@ -31,6 +37,10 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat coverage.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "report<<EOF" >> $GITHUB_OUTPUT
+          cat coverage.txt | column -t > coverage-aligned.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Publish Backend Test Results
         uses: dorny/test-reporter@v3
@@ -41,7 +51,6 @@ jobs:
           reporter: java-junit
 
   unit-tests-frontend:
-    needs: unit-tests-backend
     runs-on: ubuntu-latest
     
     steps:
@@ -71,4 +80,21 @@ jobs:
         with:
           name: Frontend Unit Tests Report
           path: ./bugtracker-frontend/test-results.xml
-          reporter: jest-junit
+          reporter: java-junit
+
+  create-backend-coverage-comment:
+    if: github.event_name == 'pull_request'
+    needs: unit-tests-backend
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Create Backend Coverage Comment
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## Backend Test Coverage Report ##
+            ```
+            ${{ needs.unit-tests-backend.outputs.coverage }}
+            ```
