@@ -44,7 +44,7 @@ jobs:
 
           {
             echo "report<<EOF"
-            cat coverage.txt | column -t > coverage-aligned.txt
+            column -t coverage.txt
             echo "EOF" 
           } >> $GITHUB_OUTPUT
           
