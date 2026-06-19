@@ -182,7 +182,7 @@ jobs:
 
   deploy-api-playwright-report:
     if: always()
-    needs: api-tests
+    needs: api-e2e-tests
 
     runs-on: ubuntu-latest
 
