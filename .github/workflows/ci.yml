@@ -49,8 +49,8 @@ jobs:
           } >> $GITHUB_OUTPUT
           
       - name: Publish Backend Test Results
-        uses: dorny/test-reporter@v3
         if: always()
+        uses: dorny/test-reporter@v3
         with:
           name: Backend Unit Tests Report
           path: ./bugtracker-backend/test-results.xml
@@ -93,8 +93,8 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       - name: Publish Frontend Test Results
-        uses: dorny/test-reporter@v1
         if: always()
+        uses: dorny/test-reporter@v3
         with:
           name: Frontend Unit Tests Report
           path: ./bugtracker-frontend/test-results.xml
@@ -163,3 +163,12 @@ jobs:
           name: API Test Playwright Report
           path: ./tests-api/playwright-report
           retention-days: 5
+
+      - name: Publish API Test Results
+        if: always()
+        uses: dorny/test-reporter@v3
+        with: 
+          name: API Tests Report
+          path: ./tests-api/test-results/*.xml
+          reporter: java-junit
+          
