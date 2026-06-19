@@ -171,4 +171,38 @@ jobs:
           name: API Tests Report
           path: ./tests-api/test-results/*.xml
           reporter: java-junit
+
+  deploy-api-playwright-report:
+    if: always()
+    needs: api-tests
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Download Playwright Report
+        uses: actions/download-artifact@v4
+        with:
+          name: API Test Playwright Report
+          path: ./tests-api/playwright-report
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./tests-api/playwright-report
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
           
