@@ -165,6 +165,14 @@ jobs:
           path: ./tests-api/test-results
           retention-days: 5
 
+      - name: Upload E2E Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: E2E Test Results
+          path: ./tests-e2e/test-results
+          retention-days: 5
+
       - name: Upload API Test Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -173,15 +181,31 @@ jobs:
           path: ./tests-api/playwright-report
           retention-days: 5
 
+      - name: Upload E2E Test Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: E2E Test Playwright Report
+          path: ./tests-e2e/playwright-report
+          retention-days: 5
+
       - name: Publish API Test Results
         if: always()
         uses: dorny/test-reporter@v3
         with: 
           name: API Tests Report
-          path: ./tests-api/test-results/*.xml
+          path: ./tests-api/test-results/results.xml
           reporter: java-junit
 
-  deploy-api-playwright-report:
+      - name: Publish E2E Test Results
+        if: always()
+        uses: dorny/test-reporter@v3
+        with: 
+          name: E2E Tests Report
+          path: ./tests-e2e/test-results/results.xml
+          reporter: java-junit
+
+  deploy-playwright-reports:
     if: always()
     needs: api-e2e-tests
 
@@ -200,18 +224,43 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Download Playwright Report
+      - name: Download API Playwright Report
         uses: actions/download-artifact@v4
         with:
           name: API Test Playwright Report
-          path: ./tests-api/playwright-report
+          path: site/api
+
+      - name: Download E2E Playwright Report
+        uses: actions/download-artifact@v4
+        with:
+          name: E2E Test Playwright Report
+          path: site/e2e
+
+      - name: Create Landing Page
+        run: |
+          cat > site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Playwright Reports</title>
+          </head>
+          <body>
+            <h1>Playwright Reports</h1>
+            <ul>
+              <li><a href="./api/">API Test Report</a></li>
+              <li><a href="./e2e/">E2E Test Report</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./tests-api/playwright-report
+          path: site
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy Reports to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
           
