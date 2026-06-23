@@ -163,6 +163,7 @@ jobs:
           k6 run script.js --out json=summary.json
 
       - name: Shutdown Application
+        if: always()
         run: docker compose down
 
       - name: Upload API Test Results
