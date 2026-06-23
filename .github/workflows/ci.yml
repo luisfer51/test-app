@@ -198,6 +198,21 @@ jobs:
           path: ./tests-e2e/playwright-report
           retention-days: 5
 
+      - name: Upload Performance Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Performance Test Results
+          path: ./tests-perf/perf-results.hml
+          retention-days: 5
+
+      - name: Upload Performance Test Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: Performance Test Summary
+          path: ./tests-perf/summary.json
+          retention-days: 5
+
       - name: Publish API Test Results
         if: always()
         uses: dorny/test-reporter@v3
@@ -235,15 +250,24 @@ jobs:
 
       - name: Download API Playwright Report
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: API Test Playwright Report
           path: site/api
 
       - name: Download E2E Playwright Report
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: E2E Test Playwright Report
           path: site/e2e
+
+      - name: Download Performance Report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: Performance Test Results
+          path: site/perf
 
       - name: Create Landing Page
         run: |
@@ -259,6 +283,7 @@ jobs:
             <ul>
               <li><a href="./api/">API Test Report</a></li>
               <li><a href="./e2e/">E2E Test Report</a></li>
+              <li><a href="./perf/">Performance Test Report</a></li>
             </ul>
           </body>
           </html>

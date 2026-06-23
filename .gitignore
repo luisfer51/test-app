@@ -10,6 +10,7 @@ playwright/.cache/
 **/test-results.json
 tests-perf/test-results/*
 tests-perf/perf-results.html
+tests-perf/summary.json
 bugtracker-backend/report.xml
 bugtracker-backend/coverage*
 bugtracker-frontend/full_output.txt
