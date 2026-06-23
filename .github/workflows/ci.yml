@@ -158,10 +158,9 @@ jobs:
         uses: grafana/setup-k6-action@v1
 
       - name: Run Performance Test
-        uses: grafana/run-k6-action@v1
-        with:
-          path: ./tests-perf/script.js
-          flags: --out json=summary.json
+        working-directory: ./tests-perf
+        run: |
+          k6 run script.js --out json=summary.json
 
       - name: Shutdown Application
         run: docker compose down
@@ -203,7 +202,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Performance Test Results
-          path: ./tests-perf/perf-results.hml
+          path: ./tests-perf/perf-results.html
           retention-days: 5
 
       - name: Upload Performance Test Summary
