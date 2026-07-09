@@ -70,8 +70,7 @@ func createServer() *http.Server {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:3000",
-			"https://bugtracker-staging-jameswillett.fly.dev",
-			"https://bugtracker-jameswillett.fly.dev",
+			"https://bugtracker-frontend-804706805992.southamerica-west1.run.app",
 		},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"*"},

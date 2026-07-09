@@ -2,6 +2,14 @@ pipeline {
     agent any
 
     stages {
+        stage('Environment Check') {
+            steps {
+                sh 'docker --version || true'
+                sh 'gcloud --version || true'
+                sh 'which docker || true'
+                sh 'which gcloud || true'
+            }
+        }
         stage('Execute Unit Tests') {
             parallel {
                 stage('Unit Tests - Backend') {

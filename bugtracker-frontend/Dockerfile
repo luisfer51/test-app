@@ -10,6 +10,7 @@ COPY . .
 
 # Accept a build argument, needed for deploying on Fly.io
 ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN echo "test-results.xml" >> .dockerignore
 
