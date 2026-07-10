@@ -16,18 +16,6 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        stage('Docker Auth Check') {
-            agent {
-                docker {
-                    image 'google/cloud-sdk:slim'
-                    reuseNode true
-                }
-            }
-
-            steps {
-                sh 'docker --version'
-            }
-        }
         stage('Build Backend Image') {
             steps {
                 dir('bugtracker-backend') {
