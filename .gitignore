@@ -14,6 +14,7 @@ tests-perf/summary.json
 bugtracker-backend/report.xml
 bugtracker-backend/coverage*
 bugtracker-frontend/full_output.txt
+/jenkins/Dockerfile_copy
 
 # Dependencies
 node_modules/
