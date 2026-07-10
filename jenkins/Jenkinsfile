@@ -25,6 +25,18 @@ pipeline {
                 }
             }
         }
+        stage('Docker Auth Check') {
+            agent {
+                docker {
+                    image 'google/cloud-sdk:slim'
+                    reuseNode true
+                }
+            }
+
+            steps {
+                sh 'docker --version'
+            }
+        }
         stage('Execute Unit Tests') {
             parallel {
                 stage('Unit Tests - Backend') {
