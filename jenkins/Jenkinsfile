@@ -16,40 +16,6 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        stage('Build Backend Image') {
-            steps {
-                dir('bugtracker-backend') {
-                    sh '''
-                        docker build -t bugtracker-backend:test .
-                    '''
-                }
-            }
-        }
-        stage('Push to Artifact Registry') {
-            steps {
-                withCredentials([
-                    file(
-                        credentialsId: 'gcp-service-account',
-                        variable: 'GCP_KEY'
-                    )
-                ]) {
-                    sh '''
-                        gcloud auth activate-service-account --key-file=$GCP_KEY
-
-                        gcloud config set project bugtracker-demo
-
-                        gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
-
-                        docker tag \
-                          bugtracker-backend:test \
-                          southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/backend:jenkins-test
-
-                        docker push \
-                          southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/backend:jenkins-test
-                    '''
-                }
-            }
-        }
         stage('Execute Unit Tests') {
             parallel {
                 stage('Unit Tests - Backend') {
@@ -207,6 +173,63 @@ pipeline {
                         reportFiles: 'perf-results.html',
                         reportName: 'K6 Performance Test Report'
                     ])
+                }
+            }
+        }
+        stage('Build Backend Image') {
+            steps {
+                dir('bugtracker-backend') {
+                    sh '''
+                        docker build -t bugtracker-backend:test .
+                    '''
+                }
+            }
+        }
+        stage('Push to Artifact Registry') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'gcp-service-account',
+                        variable: 'GCP_KEY'
+                    )
+                ]) {
+                    sh '''
+                        gcloud auth activate-service-account --key-file=$GCP_KEY
+
+                        gcloud config set project bugtracker-demo
+
+                        gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+
+                        docker tag \
+                          bugtracker-backend:test \
+                          southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/backend:jenkins-test
+
+                        docker push \
+                          southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/backend:jenkins-test
+                    '''
+                }
+            }
+        }
+        stage('Deploy Backend') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'gcp-service-account',
+                        variable: 'GCP_KEY'
+                    )
+                ]) {
+                    sh '''
+                        gcloud auth activate-service-account \
+                        --key-file=$GCP_KEY
+
+                        gcloud config set project bugtracker-demo
+
+                        gcloud run deploy bugtracker-backend \
+                        --image southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/backend:jenkins-test \
+                        --platform managed \
+                        --region southamerica-west1 \
+                        --allow-unauthenticated
+                    '''
                 }
             }
         }
