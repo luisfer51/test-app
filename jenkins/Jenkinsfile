@@ -16,6 +16,15 @@ pipeline {
                 sh 'ls -la'
             }
         }
+        stage('Build Backend Image') {
+            steps {
+                dir('bugtracker-backend') {
+                    sh '''
+                        docker build -t bugtracker-backend:test .
+                    '''
+                }
+            }
+        }
         stage('Execute Unit Tests') {
             parallel {
                 stage('Unit Tests - Backend') {
