@@ -233,6 +233,19 @@ pipeline {
                 }
             }
         }
+        stage('Smoke Test Backend') {
+            steps {
+                sh '''
+                    echo "Checking deployed backend..."
+
+                    RESPONSE=$(curl -s https://bugtracker-backend-804706805992.southamerica-west1.run.app/api/health)
+
+                    echo "$RESPONSE"
+
+                    echo "$RESPONSE" | grep '"status":"ok"'
+                '''
+            }
+        }
     }
     post {
         always {
