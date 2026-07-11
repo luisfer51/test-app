@@ -281,6 +281,29 @@ pipeline {
                 }
             }
         }
+        stage('Deploy Frontend') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'gcp-service-account',
+                        variable: 'GCP_KEY'
+                    )
+                ]) {
+                    sh '''
+                        gcloud auth activate-service-account \
+                        --key-file=$GCP_KEY
+
+                        gcloud config set project bugtracker-demo
+
+                        gcloud run deploy bugtracker-frontend \
+                        --image southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/frontend:jenkins-test \
+                        --platform managed \
+                        --region southamerica-west1 \
+                        --allow-unauthenticated
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
