@@ -238,7 +238,7 @@ pipeline {
                 sh '''
                     echo "Checking deployed backend..."
 
-                    HTTP_CODE=$(curl -s \
+                    HTTP_CODE=$(curl --fail -s \
                         -o response.json \
                         -w "%{http_code}" \
                         https://bugtracker-backend-804706805992.southamerica-west1.run.app/api/health)
@@ -249,7 +249,7 @@ pipeline {
 
                     test "$HTTP_CODE" = "200"
 
-                    grep '"status":"ok"' response.json
+                    grep -q '"status":"ok"' response.json
                 '''
             }
         }
