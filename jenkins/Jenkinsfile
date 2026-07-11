@@ -185,7 +185,7 @@ pipeline {
                 }
             }
         }
-        stage('Push to Artifact Registry') {
+        stage('Push Backend Image') {
             steps {
                 withCredentials([
                     file(
@@ -238,11 +238,18 @@ pipeline {
                 sh '''
                     echo "Checking deployed backend..."
 
-                    RESPONSE=$(curl -s https://bugtracker-backend-804706805992.southamerica-west1.run.app/api/health)
+                    HTTP_CODE=$(curl -s \
+                        -o response.json \
+                        -w "%{http_code}" \
+                        https://bugtracker-backend-804706805992.southamerica-west1.run.app/api/health)
 
-                    echo "$RESPONSE"
+                    echo "HTTP Status: $HTTP_CODE"
 
-                    echo "$RESPONSE" | grep '"status":"ok"'
+                    cat response.json
+
+                    test "$HTTP_CODE" = "200"
+
+                    grep '"status":"ok"' response.json
                 '''
             }
         }
