@@ -246,6 +246,41 @@ pipeline {
                 '''
             }
         }
+        stage('Build Frontend Image') {
+            steps {
+                dir('bugtracker-frontend') {
+                    sh '''
+                        docker build \
+                        --build-arg NEXT_PUBLIC_API_URL=https://bugtracker-backend-804706805992.southamerica-west1.run.app \
+                        -t bugtracker-frontend:test .
+                    '''
+                }
+            }
+        }
+        stage('Push Frontend Image') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'gcp-service-account',
+                        variable: 'GCP_KEY'
+                    )
+                ]) {
+                    sh '''
+                        gcloud auth activate-service-account --key-file=$GCP_KEY
+
+                        gcloud config set project bugtracker-demo
+
+                        gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+
+                        docker tag bugtracker-frontend:test \
+                        southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/frontend:jenkins-test
+
+                        docker push \
+                        southamerica-west1-docker.pkg.dev/bugtracker-demo/bugtracker-repo/frontend:jenkins-test
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
