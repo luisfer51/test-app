@@ -30,3 +30,14 @@ jobs:
         run: |
           gcloud artifacts repositories list \
             --location=$REGION
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+
+      - name: Build Backend Image
+        working-directory: ./bugtracker-backend
+        run: |
+          docker build \
+            -t southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend:${{ github.sha }} \
+            .
