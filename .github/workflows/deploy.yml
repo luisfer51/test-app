@@ -59,3 +59,20 @@ jobs:
             --platform managed \
             --region southamerica-west1 \
             --allow-unauthenticated
+
+      - name: Backend Smoke Test
+        run: |
+          echo "Checking deployed backend..."
+
+          HTTP_CODE=$(curl --fail -s \
+            -o response.json \
+            -w "%{http_code}" \
+            https://bugtracker-backend-804706805992.southamerica-west1.run.app/api/health)
+
+          echo "HTTP Status: $HTTP_CODE"
+
+          cat response.json
+
+          test "$HTTP_CODE" = "200"
+
+          grep -qi '"status":"ok"' response.json
