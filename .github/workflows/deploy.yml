@@ -51,3 +51,11 @@ jobs:
         run: |
           gcloud artifacts docker images list \
             southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend
+
+      - name: Deploy Backend
+        run: |
+          gcloud run deploy bugtracker-backend \
+            --image southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend:githubactions-test \
+            --platform managed \
+            --region southamerica-west1 \
+            --allow-unauthenticated
