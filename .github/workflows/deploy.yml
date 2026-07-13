@@ -26,6 +26,7 @@ jobs:
         run: |
           gcloud auth list
 
-      - name: Verify Project Access
+      - name: Verify Artifact Registry Access
         run: |
-          gcloud projects describe $PROJECT_ID
+          gcloud artifacts repositories list \
+            --location=$REGION
