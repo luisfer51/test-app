@@ -39,5 +39,15 @@ jobs:
         working-directory: ./bugtracker-backend
         run: |
           docker build \
-            -t southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend:${{ github.sha }} \
+            -t southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend:githubactions-test \
             .
+
+      - name: Push Backend Image
+        run: |
+          docker push \
+            southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend:githubactions-test
+
+      - name: Verify Backend Image Exists
+        run: |
+          gcloud artifacts docker images list \
+            southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/backend
