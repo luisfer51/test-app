@@ -249,7 +249,7 @@ pipeline {
 
                     test "$HTTP_CODE" = "200"
 
-                    grep -q '"status":"ok"' response.json
+                    grep -qi '"status":"ok"' response.json
                 '''
             }
         }
@@ -309,6 +309,24 @@ pipeline {
                         --allow-unauthenticated
                     '''
                 }
+            }
+        }
+        stage('Smoke Test Frontend') {
+            steps {
+                sh '''
+                    echo "Checking deployed frontend..."
+
+                    HTTP_CODE=$(curl --fail -s \
+                        -o frontend.html \
+                        -w "%{http_code}" \
+                        https://bugtracker-frontend-804706805992.southamerica-west1.run.app)
+
+                    echo "HTTP Status: $HTTP_CODE"
+
+                    test "$HTTP_CODE" = "200"
+
+                    grep -qi "<html" frontend.html
+                '''
             }
         }
     }
