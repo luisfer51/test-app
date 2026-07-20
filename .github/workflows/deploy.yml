@@ -8,7 +8,7 @@ env:
   REGION: southamerica-west1
 
 jobs:
-  verify-gcp-access:
+  deploy-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -76,3 +76,48 @@ jobs:
           test "$HTTP_CODE" = "200"
 
           grep -qi '"status":"ok"' response.json
+          
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build Frontend Image
+        working-directory: ./bugtracker-frontend
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=https://bugtracker-backend-804706805992.southamerica-west1.run.app \
+            -t southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/frontend:githubactions-test \
+            .
+      
+      - name: Push Frontend Image
+        run: |
+          docker push \
+            southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/frontend:githubactions-test
+
+      - name: Verify Frontend Image Exists
+        run: |
+          gcloud artifacts docker images list \
+            southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/frontend
+
+      - name: Deploy Frontend
+        run: |
+          gcloud run deploy bugtracker-frontend \
+            --image southamerica-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/bugtracker-repo/frontend:githubactions-test \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated
+
+      - name: Frontend Smoke Test
+        run: |
+          echo "Checking deployed frontend..."
+
+          HTTP_CODE=$(curl --fail -s \
+            -o frontend.html \
+            -w "%{http_code}" \
+            https://bugtracker-frontend-804706805992.southamerica-west1.run.app)
+
+          echo "HTTP Status: $HTTP_CODE"
+
+          test "$HTTP_CODE" = "200"
+
+          grep -qi "<html" frontend.html
